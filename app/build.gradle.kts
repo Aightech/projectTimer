@@ -44,6 +44,7 @@ dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Jetpack Compose
     implementation(platform(libs.androidx.compose.bom))

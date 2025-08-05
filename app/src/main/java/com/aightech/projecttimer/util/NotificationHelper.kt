@@ -1,13 +1,16 @@
 // util/NotificationHelper.kt
 package com.aightech.projecttimer.util
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import com.aightech.projecttimer.R // Assuming your icon is in res/drawable
 
 object NotificationHelper {
     private const val CHANNEL_ID = "timer_channel"
+    private const val ONGOING_NOTIFICATION_ID = 1 // Or any other unique integer
 
     fun createChannel(ctx: Context) {
         val mgr = ctx.getSystemService(NotificationManager::class.java)
@@ -17,20 +20,26 @@ object NotificationHelper {
         mgr.createNotificationChannel(chan)
     }
 
-    fun showOngoing(ctx: Context, title: String, elapsed: Long) {
-        val notif = NotificationCompat.Builder(ctx, CHANNEL_ID)
-            .setContentTitle("Working: $title")
-            .setContentText("Elapsed: ${elapsed/1000}s")
+    fun showOngoing(context: Context, contentTitle: String, contentText: String) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setContentTitle(contentTitle)
+            .setContentText(contentText)
+            .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
-            .build()
-        ctx.getSystemService(NotificationManager::class.java).notify(1, notif)
+        // Add other notification properties as needed (e.g., priority, category)
+
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, builder.build())
     }
 
-    fun update(ctx: Context, title: String, elapsed: Long) {
-        showOngoing(ctx, title, elapsed)
+    // It seems 'elapsed' in the original code was meant to be a String for contentText.
+    // If 'elapsed' is truly a Long representing time, you'll need to format it to a String.
+    fun update(ctx: Context, title: String, elapsedText: String) { // Changed 'elapsed: Long' to 'elapsedText: String'
+        showOngoing(ctx, title, elapsedText)
     }
 
     fun cancel(ctx: Context) {
-        ctx.getSystemService(NotificationManager::class.java).cancel(1)
+        ctx.getSystemService(NotificationManager::class.java).cancel(ONGOING_NOTIFICATION_ID)
     }
 }

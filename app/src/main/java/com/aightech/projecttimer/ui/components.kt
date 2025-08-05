@@ -18,23 +18,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.aightech.projecttimer.model.Project
-import com.aightech.projecttimer.model.Session
+import com.aightech.projecttimer.model.Session // Ensure Session is imported
 import com.aightech.projecttimer.R
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun ProjectItem(
     project: Project,
+    isTimerActive: Boolean,
     onClick: () -> Unit,
     onEdit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val cardContainerColor = if (isTimerActive) Color.Green else MaterialTheme.colorScheme.surfaceVariant
     Card(
         modifier
             .padding(8.dp)
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = cardContainerColor
+        )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -44,7 +49,7 @@ fun ProjectItem(
                 modifier = Modifier
                     .size(16.dp)
                     .clip(CircleShape)
-                    .background(Color(project.color))
+                    .background(Color(project.color)) // Assuming project.color is a Long representing Color
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -57,38 +62,39 @@ fun ProjectItem(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-//            IconButton(onClick = { onEdit() }) {
-//                Icon(
-//                    painter = painterResource(id = R.drawable.ic_more_vert),
-//                    contentDescription = "Edit project"
-//                )
-//            }
+            IconButton(onClick = { onEdit() }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.outline_atr_24),
+                    contentDescription = "Edit project"
+                )
+            }
         }
     }
 }
 @Composable
 fun SessionItem(
     session: Session,
+    projectColor: Long, // Add projectColor parameter
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier
-            .padding(8.dp)
+        modifier // Apply the passed-in modifier here
+            .padding(8.dp) // Apply padding around the Card
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp) // Padding for the content inside the Card
         ) {
-            // colour indicator (could later reflect project colour)
+            // Use project color from parameter
             Box(
                 modifier = Modifier
                     .size(16.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(Color(projectColor)) // Use the passed projectColor
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -98,7 +104,7 @@ fun SessionItem(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = session.date.format(DateTimeFormatter.ofPattern("HH:mm")) +
+                    text = session.startTime.format(DateTimeFormatter.ofPattern("HH:mm")) +
                             "  •  ${session.durationMinutes} min",
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -116,3 +122,4 @@ fun SessionItem(
         }
     }
 }
+
