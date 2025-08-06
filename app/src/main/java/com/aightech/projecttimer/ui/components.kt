@@ -30,7 +30,7 @@ fun ProjectItem(
     onEdit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardContainerColor = if (isTimerActive) Color.Green else MaterialTheme.colorScheme.surfaceVariant
+    val cardContainerColor = if (isTimerActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
     Card(
         modifier
             .padding(8.dp)
@@ -58,9 +58,16 @@ fun ProjectItem(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = "${project.hoursDone}h / ${project.expectedHours}h",
+                    text = "%.2fh / %.2fh".format(project.hoursDone, project.expectedHours),
                     style = MaterialTheme.typography.bodySmall
                 )
+                if (isTimerActive) {
+                    Text(
+                        text = "Timer Active",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
             IconButton(onClick = { onEdit() }) {
                 Icon(
@@ -105,7 +112,7 @@ fun SessionItem(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = session.startTime.format(DateTimeFormatter.ofPattern("HH:mm")) +
-                            "  •  ${session.durationMinutes} min",
+                            "  •  %.2fh min".format(session.durationMinutes),
                     style = MaterialTheme.typography.bodySmall
                 )
                 session.note

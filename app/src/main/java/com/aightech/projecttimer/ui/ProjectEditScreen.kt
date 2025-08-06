@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.aightech.projecttimer.model.ProjectViewModel
 import com.aightech.projecttimer.model.Project
+import java.time.LocalDate
 import java.util.UUID
 
 @Composable
@@ -74,25 +75,39 @@ fun ProjectEditScreen(
 //            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
         Spacer(modifier = Modifier.weight(1f))
-        Button(
-            onClick = {
-                val updated = Project(
-                    id = initial.id,
-                    name = name,
-                    color = colorHex.toLong(16),
-                    expectedHours = expectedHours.toFloatOrNull() ?: 0f,
-                    hoursDone = hoursDone.toFloatOrNull() ?: 0f
-                )
-                if (projectId == "new" || existing == null) {
-                    viewModel.addProject(updated)
-                } else {
-                    viewModel.updateProject(updated)
-                }
-                navController.popBackStack()
-            },
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Save")
+            Button(
+                onClick = {
+                    if (projectId != "new") {
+                        viewModel.removeProject(initial)
+                    }
+                    navController.popBackStack()
+                },
+                modifier = Modifier.weight(1f)
+            ) { Text("Delete") }
+            Button(
+                onClick = {
+                    val updated = Project(
+                        id = initial.id,
+                        name = name,
+                        color = colorHex.toLong(16),
+                        expectedHours = expectedHours.toFloatOrNull() ?: 0f,
+                        hoursDone = hoursDone.toFloatOrNull() ?: 0f
+                    )
+                    if (projectId == "new" || existing == null) {
+                        viewModel.addProject(updated)
+                    } else {
+                        viewModel.updateProject(updated)
+                    }
+                    navController.popBackStack()
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Save")
+            }
         }
     }
 }

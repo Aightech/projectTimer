@@ -2,15 +2,25 @@ package com.aightech.projecttimer.util
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.ui.input.key.type
+import android.util.Log
 import com.aightech.projecttimer.model.Project
 import com.aightech.projecttimer.model.Session
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalTime
 
 object PersistenceManager {
     private lateinit var prefs: SharedPreferences
-    private val gson = Gson()
+    private val gson: Gson = GsonBuilder()
+        .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
+        .registerTypeAdapter(LocalTime::class.java, LocalTimeAdapter())
+        .create()
+    fun getGsonInstance(): Gson { // Public getter
+        return gson
+    }
 
     private const val PREFS_NAME = "ProjectTimerPrefs"
     private const val KEY_PROJECTS = "projects"
@@ -19,6 +29,7 @@ object PersistenceManager {
     private const val KEY_ACTIVE_PROJECT_NAME = "active_project_name" // Storing name for convenience
     private const val KEY_ACTIVE_ELAPSED_TIME = "active_elapsed_time"
 
+    private const val KEY_STARTING_DAY_OF_WEEK = "starting_day_of_week"
     fun init(context: Context) {
         prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -40,10 +51,34 @@ object PersistenceManager {
         }
     }
 
+    fun saveStartingDayOfWeek(day: DayOfWeek) {
+        prefs.edit().putString(KEY_STARTING_DAY_OF_WEEK, day.name).apply()
+        Log.d("PersistenceManager", "Saved starting day of week: $day")
+    }
+
+    fun loadStartingDayOfWeek(): DayOfWeek {
+        val dayName = prefs.getString(KEY_STARTING_DAY_OF_WEEK, DayOfWeek.MONDAY.name)
+        Log.d("PersistenceManager", "Loaded starting day of week: $dayName")
+        return try {
+            DayOfWeek.valueOf(dayName ?: DayOfWeek.MONDAY.name)
+        } catch (e: IllegalArgumentException) {
+            DayOfWeek.MONDAY // Default if parsing fails
+        }
+    }
+
     // --- Session Persistence ---
 
     fun saveSessions(sessions: List<Session>) {
+        Log.d("PersistenceManager", "First session ID: ${sessions.firstOrNull()?.id}")
+        Log.d("PersistenceManager", "First session project ID: ${sessions.firstOrNull()?.projectId}")
+        Log.d("PersistenceManager", "First session title: ${sessions.firstOrNull()?.title}")
+        Log.d("PersistenceManager", "First session date: ${sessions.firstOrNull()?.date}")
+        Log.d("PersistenceManager", "First session start time: ${sessions.firstOrNull()?.startTime}")
+        Log.d("PersistenceManager", "First session end time: ${sessions.firstOrNull()?.endTime}")
+        Log.d("PersistenceManager", "First session duration minutes: ${sessions.firstOrNull()?.durationMinutes}")
+
         val json = gson.toJson(sessions)
+        Log.d("PersistenceManager", "Saving Sessions: $json")
         prefs.edit().putString(KEY_SESSIONS, json).apply()
     }
 
@@ -51,6 +86,8 @@ object PersistenceManager {
         val json = prefs.getString(KEY_SESSIONS, null)
         return if (json != null) {
             val type = object : TypeToken<List<Session>>() {}.type
+            //log the list of sessions
+            Log.d("PersistenceManager", "Loaded Sessions: $json")
             gson.fromJson(json, type) ?: emptyList()
         } else {
             emptyList()
@@ -134,4 +171,3 @@ object PersistenceManager {
         prefs.edit().clear().apply()
     }
 }
-

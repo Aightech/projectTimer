@@ -14,7 +14,7 @@ data class Project(
     val name: String,
     val color: Long=0xffff0000,
     val expectedHours: Float=1f,
-    val hoursDone: Float = 0f,
+    var hoursDone: Float = 0f,
     val workedHours: Float = 0f
 )
 
@@ -26,8 +26,15 @@ class ProjectViewModel : ViewModel() {
     val projects: StateFlow<List<Project>> = _projects.asStateFlow()
 
     init {
-        // Load projects when ViewModel is created
+        loadProjectsInternal() // Changed to internal call
+    }
+
+    private fun loadProjectsInternal() { // Made private or internal
         _projects.value = PersistenceManager.loadProjects()
+    }
+
+    fun forceReloadProjects() { // Public method for explicit reload
+        loadProjectsInternal()
     }
 
     /**
@@ -36,6 +43,11 @@ class ProjectViewModel : ViewModel() {
     fun addProject(project: Project) {
         _projects.value = _projects.value + project
         PersistenceManager.saveProjects(_projects.value) // Save after adding
+    }
+
+    fun removeProject(project: Project) {
+        _projects.value = _projects.value - project
+        PersistenceManager.saveProjects(_projects.value) // Save after removing
     }
 
     /**

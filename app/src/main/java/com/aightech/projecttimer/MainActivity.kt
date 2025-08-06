@@ -22,14 +22,16 @@ import com.aightech.projecttimer.ui.BottomNav
 import com.aightech.projecttimer.ui.ProjectsScreen
 import com.aightech.projecttimer.ui.ProjectEditScreen
 import com.aightech.projecttimer.ui.SessionsScreen
-import com.aightech.projecttimer.ui.SettingsPage
-import com.aightech.projecttimer.ui.WelcomePage
+import com.aightech.projecttimer.ui.SessionEditScreen
+import com.aightech.projecttimer.ui.SettingsScreen
+import com.aightech.projecttimer.ui.WelcomeScreen
 import com.aightech.projecttimer.util.NotificationHelper
 import com.aightech.projecttimer.util.PersistenceManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aightech.projecttimer.model.ProjectViewModel
 import android.util.Log
 import com.aightech.projecttimer.model.SessionViewModel
+import com.aightech.projecttimer.model.SettingsViewModel
 import com.aightech.projecttimer.model.TimerMechanism
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -82,16 +84,20 @@ class MainActivity : ComponentActivity() {
             val projectVM: ProjectViewModel = viewModel()
             // Hoist SessionViewModel and TimerMechanism
             val sessionVM: SessionViewModel = viewModel()
+            sessionVM.setProjectViewModel(projectVM)
             val timerMechanism: TimerMechanism = viewModel(
                 factory = TimerMechanismFactory(application, sessionVM,context),
             )
+            val settingsVM: SettingsViewModel = viewModel()
+            settingsVM.setProjectViewModel(projectVM)
+            settingsVM.setSessionViewModel(sessionVM)
 
             val navController = rememberNavController()
 
             var showWelcome by remember { mutableStateOf(true) }
 
             if (showWelcome) {
-                WelcomePage(onGetStarted = {
+                WelcomeScreen(onGetStarted = {
                     showWelcome = false
                 })
             } else {
@@ -124,9 +130,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("session_edit/{sessionId}") { backStack ->
                             val id = backStack.arguments?.getString("sessionId") ?: "new"
-                            // SessionEditScreen(navController, sessionId = id)
+                            SessionEditScreen(sessionId = id,navController, projectVM, sessionVM)
                         }
-                        composable("settings") { SettingsPage() }
+                        composable("settings") { SettingsScreen(settingsVM) }
                     }
                 }
             }

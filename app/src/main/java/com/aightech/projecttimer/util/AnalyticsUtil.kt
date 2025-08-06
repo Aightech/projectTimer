@@ -14,16 +14,16 @@ object AnalyticsUtil {
     fun calculateWeeklyHours(): Float {
         val now = LocalDate.now()
         val weekNo = now.get(WeekFields.of(Locale.getDefault()).weekOfYear())
-        return sessions
+        return (sessions
             .filter { it.date.get(WeekFields.of(Locale.getDefault()).weekOfYear()) == weekNo }
-            .sumOf { it.durationMinutes } / 60f
+            .sumOf { it.durationMinutes.toDouble() } / 60f).toFloat()
     }
 
     fun calculateMonthlyHours(): Float {
         val now = YearMonth.now()
-        return sessions
+        return (sessions
             .filter { YearMonth.from(it.date) == now }
-            .sumOf { it.durationMinutes } / 60f
+            .sumOf { it.durationMinutes.toDouble() } / 60f).toFloat()
     }
 }
 

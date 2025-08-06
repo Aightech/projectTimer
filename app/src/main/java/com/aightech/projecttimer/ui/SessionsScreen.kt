@@ -9,6 +9,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +36,8 @@ fun SessionsScreen(
 
     val grouped = sessions.groupBy { it.date }
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize()) {
+        Text("Sessions", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(10.dp, 25.dp, 0.dp, 16.dp))
+        LazyColumn(Modifier.fillMaxSize().padding(0.dp, 70.dp, 0.dp, 0.dp)) {
             grouped.forEach { (date, list) ->
                 item { DateSeparator(date.format(DateTimeFormatter.ISO_DATE)) }
                 items(list) { session ->

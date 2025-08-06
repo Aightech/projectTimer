@@ -34,8 +34,12 @@ class TimerMechanism(
 
     private val _currentTime = MutableStateFlow("00:00:00")
     val currentTime: StateFlow<String> = _currentTime.asStateFlow()
+    private val _currentProjectState = MutableStateFlow(0)
+    val currentProjectState: StateFlow<Int> = _currentProjectState.asStateFlow()
+
 
     private var currentSession: Session? = null
+    //state of the timer : 0 = not running, 1 = running, 2: paused
 
     init {
         Log.d("TimerMechanism", "ViewModel instance ${this.hashCode()} initialized with SessionViewModel hash: ${sessionViewModel.hashCode()}")
@@ -50,6 +54,7 @@ class TimerMechanism(
         _currentProject.value = p
         startTime = LocalDateTime.now() // startTime is LocalDateTime
         _currentTime.value = "00:00:00" // Reset display time
+        _currentProjectState.value = 1
 
         currentSession = Session(
             projectId = p.id,
@@ -84,7 +89,12 @@ class TimerMechanism(
         }
     }
 
-    fun stop(clearCurrentProject: Boolean = true) {
+    fun pause() {
+
+    }
+
+    fun stop(note: String = ""
+        ,clearCurrentProject: Boolean = true) {
         timerJob?.cancel()
         timerJob = null
         Log.d("TimerMechanism", "Timer job stopped. clearCurrentProject: $clearCurrentProject")
@@ -96,15 +106,23 @@ class TimerMechanism(
         if (startTime != null && _currentProject.value != null && currentSession != null) {
             val localEndTime = LocalDateTime.now()
             currentSession?.endTime = localEndTime.toLocalTime() // Convert LocalDateTime to LocalTime for Session's endTime
-            currentSession?.durationMinutes = Duration.between(startTime!!, localEndTime).toMinutes()
+            currentSession?.durationMinutes = Duration.between(startTime!!, localEndTime).seconds / 60.0f
+            currentSession?.note = note
+            Log.d("TimerMechanism", "Current session ID: ${currentSession?.id}")
+            Log.d("TimerMechanism", "Project ID: ${currentSession?.projectId}")
+            Log.d("TimerMechanism", "Title: ${currentSession?.title}")
+            Log.d("TimerMechanism", "Date: ${currentSession?.date}")
+            Log.d("TimerMechanism", "Start Time: ${currentSession?.startTime}")
+            Log.d("TimerMechanism", "End Time: ${currentSession?.endTime}")
+            Log.d("TimerMechanism", "Duration Minutes: ${currentSession?.durationMinutes}")
 
-            Log.d("TimerMechanism", "Saving session ID: ${currentSession?.id} for project ${_currentProject.value?.name}")
             sessionViewModel.addSession(currentSession!!)
         }
 
         if (clearCurrentProject) {
             _currentProject.value = null
             _currentTime.value = "00:00:00"
+            _currentProjectState.value = 0
             startTime = null
             currentSession = null
             Log.d("TimerMechanism", "Current project and time cleared.")
